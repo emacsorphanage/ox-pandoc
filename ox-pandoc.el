@@ -1703,14 +1703,20 @@ Option table is created in this stage."
                (list (cons (car it) (split-string-and-unquote val))))
              '((metadata . :pandoc-metadata)
                (variable . :pandoc-variables))))
-  (org-pandoc-put-options
-   (--mapcat (-when-let (val (plist-get info (cdr it)))
-               (list (cons (car it) (split-string val "\n"))))
-             '((epub-embed-font .    :epub-embed-font)
+  (let ((org-pandoc-valid-options
+		 '((epub-embed-font .    :epub-embed-font)
                (epub-chapter-level . :epub-chapter-level)
                (epub-cover-image   . :epub-cover-image)
                (epub-stylesheet    . :epub-stylesheet)
-               (bibliography .       :bibliography))))
+               ;;(bibliography .       :bibliography)
+			   )))
+	;; Bibliography option only for org < 9.5
+	(unless (featurep 'oc)
+	  (setcar org-pandoc-valid-options '(bibliography . :bibliography) ))
+	(org-pandoc-put-options
+	 (--mapcat (-when-let (val (plist-get info (cdr it)))
+               (list (cons (car it) (split-string val "\n"))))
+			   org-pandoc-valid-options)))
   ;; 'ox-pandoc' is derived from 'ox-org'. If 'ox-org' defines its own
   ;; template, then this template function (org-pandoc-template) calls
   ;; original ox-org template at the end.
