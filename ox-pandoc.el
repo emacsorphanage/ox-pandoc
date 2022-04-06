@@ -246,8 +246,9 @@ version. If nil, no checks are performed and no warnings generated."
 
 (org-export-define-derived-backend 'pandoc 'org
   :translate-alist '((entity    . org-pandoc-entity)
-					 (export-block . org-pandoc-export-block)
-					 (latex-environment . org-pandoc-latex-environ)
+                     (export-block . org-pandoc-export-block)
+                     (export-snippet . org-pandoc-export-snippet)
+                     (latex-environment . org-pandoc-latex-environ)
                      (link      . org-pandoc-link)
                      (paragraph . org-pandoc-paragraph)
                      (src-block . org-pandoc-src-block)
@@ -1755,6 +1756,13 @@ duplicated into the temporary org file that pandoc converts.
 CONTENTS is the contents of the block. INFO is a plist holding
 contextual information."
   (org-pandoc-identity export-block contents info))
+
+(defun org-pandoc-export-snippet (export-snippet _contents _info)
+  "Transcode a EXPORT-SNIPPET element from Org to Pandoc.
+It is simply duplicated into the temporary org file that pandoc converts.
+CONTENTS is nil. INFO is a plist holding contextual information."
+  (when (eq (org-export-snippet-backend export-snippet) 'pandoc)
+    (org-element-property :value export-snippet)))
 
 (defun org-pandoc-identity (blob contents _info)
   "Transcode BLOB element or object back into Org syntax.
