@@ -70,6 +70,9 @@
     include-after-body pdf-engine-opt epub-embed-font bibliography
     filter lua-filter))
 
+(defconst org-pandoc-preprocessing-colon-separated-options
+  '(num))
+
 (defconst org-pandoc-file-options
   '(abbreviations bibliography citation-abbreviations csl defaults
     epub-cover-image epub-embed-font epub-metadata include-after-body
@@ -1460,6 +1463,7 @@ version. If nil, no checks are performed and no warnings generated."
 
 (defvar org-pandoc-format nil)
 (defvar org-pandoc-option-table nil)
+(defvar org-pandoc-preprocessing-options nil)
 (defvar org-pandoc-format-extensions-str nil)
 (defvar org-pandoc-epub-meta nil)
 (defvar org-pandoc-epub-css nil)
@@ -1492,7 +1496,18 @@ holding contextual information.  FMT is the format of the caption
 label, e.g., \"Table %d:\", or \"Figure %d:\".  PRED is a
 predicate function used by org-mode to keep track of
 table/figure/etc. numbers."
-  (if (equal (plist-get info :pandoc-preprocess) "nil")
+  ;; preprocessing options
+  (if (equal org-pandoc-preprocessing-options nil)
+      (progn
+        (setq org-pandoc-preprocessing-options (make-hash-table))
+        (-when-let (pandoc-preprocess (plist-get info :pandoc-preprocess))
+          (org-pandoc-put-preprocessing-options
+           (--map (let* ((_match (string-match "^\\([^:]+\\):\\(.+\\)$" it))
+                         (name (intern (match-string 1 it)))
+                         (value (match-string 2 it)))
+                    (cons name value))
+                  (split-string-and-unquote pandoc-preprocess))))))
+  (if (equal (gethash 'num org-pandoc-preprocessing-options) nil)
       (caar (org-element-property :caption element))
     (let* ((caption (org-element-property :caption element))
            (name (org-element-property :name element))
@@ -1827,6 +1842,20 @@ output."
                            (if (= ?~ (string-to-char it)) (expand-file-name it) it)
                          (error "File (%s) can not be found" it)) values)))
       (puthash name values org-pandoc-option-table))))
+
+(defun org-pandoc-put-preprocessing-options (options)
+  "Put alist OPTIONS to `org-pandoc-preprocessing-options'"
+  (dolist (option options)
+    (let* ((name (car option))
+           (value (cdr option))
+           (values
+            (cond ((equal "t" value) t)
+                  ((equal "nil" value) nil)
+                  ((listp value) value)
+                  ((memq name org-pandoc-preprocessing-colon-separated-options)
+                   (split-string value ":"))
+                  (t (list value)))))
+      (puthash name values org-pandoc-preprocessing-options))))
 
 (defun org-pandoc-run-to-buffer-or-file
     (input-file format subtreep &optional buffer-or-open)
