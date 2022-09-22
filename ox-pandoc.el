@@ -262,6 +262,7 @@ version. If nil, no checks are performed and no warnings generated."
        ,org-pandoc-menu-entry)
   :options-alist
   '((:pandoc-options "PANDOC_OPTIONS" nil nil space)
+    (:pandoc-preprocess "PANDOC_PREPROCESS" nil nil space)
     (:pandoc-extensions "PANDOC_EXTENSIONS" nil nil space)
     (:pandoc-metadata "PANDOC_METADATA" nil nil space)
     (:pandoc-variables "PANDOC_VARIABLES" nil nil space)
@@ -1491,26 +1492,28 @@ holding contextual information.  FMT is the format of the caption
 label, e.g., \"Table %d:\", or \"Figure %d:\".  PRED is a
 predicate function used by org-mode to keep track of
 table/figure/etc. numbers."
-  (let* ((caption (org-element-property :caption element))
-         (name (org-element-property :name element))
-         (name-target (when name (concat "<<" name ">>"))))
-    ;; caption is, e.g. "(((#("Testing table" 0 13 (:parent #8)))))"
-    ;; name is a link target, e.g., tab:test-table
-    ;; (cl-caaar caption) is then, e.g., "Testing table"
-    ;; name-target would be, e.g., "<<tab:test-table>>"
-    (when caption
-      (if (member org-pandoc-format '(beamer beamer-pdf latex latex-pdf))
-          (push name-target (caar caption))
-        ;; Get sequence number of current src-block among every
-        ;; src-block with a caption.  Additionally translate the caption
-        ;; label into the local language.
-        (let* ((reference (org-export-get-ordinal element info nil pred))
-               (title-fmt (org-export-translate fmt :utf-8 info))
-               (new-name-target (concat (format title-fmt reference) " " name-target)))
-          ;; Set the text of the caption to have, e.g., 'Table <num>:
-          ;; ' prepended. Also add a target for any hyperlinks to this
-          ;; table. Pandoc doesn't pick up #+LABEL: or #+NAME: elements.
-          (push new-name-target (caar caption)))))))
+  (if (equal (plist-get info :pandoc-preprocess) "nil")
+      (caar (org-element-property :caption element))
+    (let* ((caption (org-element-property :caption element))
+           (name (org-element-property :name element))
+           (name-target (when name (concat "<<" name ">>"))))
+      ;; caption is, e.g. "(((#("Testing table" 0 13 (:parent #8)))))"
+      ;; name is a link target, e.g., tab:test-table
+      ;; (cl-caaar caption) is then, e.g., "Testing table"
+      ;; name-target would be, e.g., "<<tab:test-table>>"
+      (when caption
+        (if (member org-pandoc-format '(beamer beamer-pdf latex latex-pdf))
+            (push name-target (caar caption))
+          ;; Get sequence number of current src-block among every
+          ;; src-block with a caption.  Additionally translate the caption
+          ;; label into the local language.
+          (let* ((reference (org-export-get-ordinal element info nil pred))
+                 (title-fmt (org-export-translate fmt :utf-8 info))
+                 (new-name-target (concat (format title-fmt reference) " " name-target)))
+            ;; Set the text of the caption to have, e.g., 'Table <num>:
+            ;; ' prepended. Also add a target for any hyperlinks to this
+            ;; table. Pandoc doesn't pick up #+LABEL: or #+NAME: elements.
+            (push new-name-target (caar caption))))))))
 
 (defun org-pandoc--numbered-equation-p (element _info)
   "Non-nil when ELEMENT is a numbered latex equation environment.

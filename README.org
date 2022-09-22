@@ -119,6 +119,7 @@ specify the option value which include space character, the /entire/
 option-value pair must be quoted (see example below).
 
 - =PANDOC_OPTIONS:= :: Add command line options to the Pandoc process.
+- =PANDOC_PREPROC:= :: Disable =ox-pandoc='s built-in preprocessing.
 - =PANDOC_METADATA:= :: Metadata for Pandoc.
 - =PANDOC_EXTENSIONS:= :: Extensions for specific Pandoc output.
 - =PANDOC_VARIABLES:= :: Variables for Pandoc.
@@ -144,6 +145,8 @@ Following is an example:
 : #+PANDOC_OPTIONS: "epub-cover-image:/home/a/test file.png" standalone:nil
 : #+PANDOC_OPTIONS: number-sections:nil
 : #+PANDOC_OPTIONS: template:mytemplate.tex
+: ## Disable built-in numbering (to use pandoc-crossref, for example)
+: #+PANDOC_PREPROC: nil
 : #+BIBLIOGRAPHY: sample.bib
 : # Specifying Multiple values to single options by using colon-sparated lists.
 : #+PANDOC_OPTIONS: filter:pandoc-zotxt:pandoc-citeproc
@@ -284,6 +287,14 @@ In this case, citations and bibliography are resolved and formatted before they 
 An alternative to the above (also relevant for Org 9.4 and earlier) is to ensure that citations in text are transformed to [[https://pandoc.org/org.html#citations][one of the formats that Pandoc recognises in org documents]]. You should then set  =#+PANDOC_OPTIONS: citeproc:t= in the document header.
 
 In this case, citations are instead processed by =pandoc= using CSL. This may be a good solution if you are using one of the alternative citation systems for Org, such as =org-ref=. A goal in =ox-pandoc= is to offer an alternative citation export processor that outputs Pandoc-specific citation syntax, but this is still in planning.
+
+** Numbering of equations, figures and tables
+=ox-pandox= does its own numbering before sending the file to =pandoc= (because =pandoc= doesn't do any numbering). External /pandoc-filters/ such as [[https://github.com/lierdakil/pandoc-crossref][pandoc-crossref]] or [[https://github.com/tomduck/pandoc-xnos][pandoc-xnos]] can be used as an alternative to built-in numbering. You should then turn off the built-in numbering and add the appropriate filter:
+
+#+BEGIN_EXAMPLE
+#+PANDOC_PREPROC: nil
+#+PANDOC_OPTIONS: filter:pandoc-crossref
+#+END_EXAMPLE
 
 ** Supported Formats
 
