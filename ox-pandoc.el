@@ -99,6 +99,13 @@
 (defconst org-pandoc-element-keyword-translation-alist
 	  (--remove (equal "LABEL" (car it) ) org-element-keyword-translation-alist))
 
+(defcustom org-pandoc-with-cite-processors t
+  "Non-nil means use built-in Org citation exporter.
+The default is different from `org-org-with-cite-processors' to
+maintain backwards compatibility."
+  :group 'org-pandoc
+  :type 'boolean)
+
 (defcustom org-pandoc-options '((standalone . t)) ;; (mathjax . t) (parse-raw . t)
   "Pandoc options."
   :group 'org-pandoc
@@ -282,7 +289,8 @@ version. If nil, no checks are performed and no warnings generated."
     (:epub-meta "EPUB_META" nil nil newline)
     (:epub-css "EPUB_CSS" nil nil newline)
     (:epub-rights "EPUB_RIGHTS" nil nil newline)
-    (:bibliography "BIBLIOGRAPHY")))
+    (:bibliography "BIBLIOGRAPHY")
+    (:with-cite-processors nil nil org-pandoc-with-cite-processors)))
 
 (defcustom org-pandoc-epub-rights
   (concat "Copyright " (format-time-string "%Y")
