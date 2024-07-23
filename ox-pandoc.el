@@ -1885,13 +1885,16 @@ If 0, target is file and converted file will automatically be opend."
         (org-pandoc-put-options `((epub-metadata ,meta-temp-file)))
         (with-temp-file meta-temp-file
           (insert org-pandoc-epub-meta))))
-    (let ((process
-           (org-pandoc-run input-file output-file format
-                           'org-pandoc-sentinel org-pandoc-option-table)))
-      (process-put process 'files (list input-file meta-temp-file css-temp-file))
-      (process-put process 'output-file output-file)
-      (process-put process 'local-hook-symbol local-hook-symbol)
-      (process-put process 'buffer-or-open buffer-or-open))))
+    (if noninteractive
+      (org-pandoc-run input-file output-file format
+                      nil org-pandoc-option-table)
+      (let ((process
+             (org-pandoc-run input-file output-file format
+                             'org-pandoc-sentinel org-pandoc-option-table)))
+        (process-put process 'files (list input-file meta-temp-file css-temp-file))
+        (process-put process 'output-file output-file)
+        (process-put process 'local-hook-symbol local-hook-symbol)
+        (process-put process 'buffer-or-open buffer-or-open)))))
 
 (defun org-pandoc-sentinel (process message)
   "PROCESS sentinel with MESSAGE.
@@ -1933,8 +1936,9 @@ Called on completion of an asynchronous pandoc process."
 (defun org-pandoc-run (input-file output-file format sentinel &optional options)
   "Run pandoc command with INPUT-FILE (org), OUTPUT-FILE, FORMAT and OPTIONS.
 If BUFFER-OR-FILE is buffer, then output to specified buffer. OPTIONS is
-a hashtable.  Pandoc runs asynchronously and SENTINEL is called
-when the process completes."
+a hashtable.  When Emacs is run in interactive mode (`noninteractive' is nil),
+Pandoc runs asynchronously and SENTINEL is called when the process completes.
+Otherwise, a synchronous pandoc process is called."
   (let* ((format (symbol-name format))
          (output-format
           (car (--filter (string-prefix-p format it)
@@ -1953,12 +1957,18 @@ when the process completes."
                        (ht-keys options))
             ,(expand-file-name input-file))))
     (message "Running pandoc with args: %s" args)
-    (let ((process
-           (apply 'start-process
-                  `("pandoc" ,(generate-new-buffer "*Pandoc*")
-                    ,org-pandoc-command ,@args))))
-      (set-process-sentinel process sentinel)
-      process)))
+    (if noninteractive
+      (let ((exit-status
+	     (apply 'call-process `(,org-pandoc-command nil nil nil ,@args))))
+	(if (= exit-status 0)
+          (message "Exported to %s." output-file)
+          (message "Error occured when exporting to %s, exit code: %d" output-file exit-status)))
+      (let ((process
+             (apply 'start-process
+                    `("pandoc" ,(generate-new-buffer "*Pandoc*")
+                      ,org-pandoc-command ,@args))))
+        (set-process-sentinel process sentinel)
+        process))))
 
 (defun org-pandoc-startup-check ()
   "Check the current pandoc version."
