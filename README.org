@@ -348,6 +348,7 @@ commands. The following table shows the supported formats:
 | slidy             | html      | yes    | yes  |
 | texinfo           | texi      | yes    | yes  |
 | textile           |           | yes    | yes  |
+| twiki             | twiki     | yes    | yes  |
 | typst             | typst     | yes    | yes  |
 | typst-pdf         | pdf       | no     | yes  |
 
