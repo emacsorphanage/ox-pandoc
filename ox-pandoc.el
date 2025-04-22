@@ -86,7 +86,7 @@
     (markdown_mmd . md) (markdown_phpextra . md)
     (markdown_strict . md) (native . hs)
     (opendocument . xml) (plain . txt) (revealjs . html) (s5 . html)
-    (slideous . html) (slidy . html) (texinfo . texi)
+    (slideous . html) (slidy . html) (texinfo . texi) (twiki . twiki)
     (zimwiki . zim)))
 
 (defconst org-pandoc-option-type
@@ -258,6 +258,9 @@ version. If nil, no checks are performed and no warnings generated."
     ;;(?~ "to haddock." org-pandoc-export-to-haddock)
     ;;(?~ "to haddock and open." org-pandoc-export-to-haddock-and-open)
     ;;(?^ "as haddock." org-pandoc-export-as-haddock)
+    ;;(?ä "to twiki." org-pandoc-export-to-twiki)
+    ;;(?Ä "to twiki and open." org-pandoc-export-to-twiki-and-open)
+    ;;(?ü "as twiki." org-pandoc-export-as-twiki)
     )
   "Pandoc menu-entry."
   :group 'org-pandoc
@@ -1512,6 +1515,30 @@ version. If nil, no checks are performed and no warnings generated."
   "Export as zimwiki."
   (interactive) (org-pandoc-export 'zimwiki a s v b e t))
 
+(defcustom org-pandoc-options-for-twiki nil
+  "Pandoc options for twiki."
+  :group 'org-pandoc
+  :type org-pandoc-option-type)
+
+(defcustom org-pandoc-after-processing-twiki-hook nil
+  "Hook called after processing twiki."
+  :group 'org-pandoc
+  :type 'hook)
+
+;;;###autoload
+(defun org-pandoc-export-to-twiki (&optional a s v b e)
+  "Export to twiki."
+  (interactive) (org-pandoc-export 'twiki a s v b e))
+
+;;;###autoload
+(defun org-pandoc-export-to-twiki-and-open (&optional a s v b e)
+  "Export to twiki and open."
+  (interactive) (org-pandoc-export 'twiki a s v b e 0))
+
+;;;###autoload
+(defun org-pandoc-export-as-twiki (&optional a s v b e)
+  "Export as twiki."
+  (interactive) (org-pandoc-export 'twiki a s v b e t))
 
 ;;; ox-pandoc main routine
 
