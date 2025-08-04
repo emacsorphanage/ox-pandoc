@@ -2,17 +2,20 @@
 
 ;; Copyright (C) 2014-2017 KAWABATA, Taichi
 ;; Copyright (C) 2021-2023 FENTON, Alex
+;; Copyright (C) 2025 TAKENOSHITA, Yuji
 
 ;; Filename: ox-pandoc.el
 ;; Description: Another org exporter for Pandoc
 ;; Author: KAWABATA, Taichi <kawabata.taichi@gmail.com>
 ;;         FENTON, Alex <a-fent@github>
-;; Maintainer: FENTON, Alex <a-fent@github>
+;; Modifier: TAKENOSHITA, Yuji <yuji.takenoshita@gmail.com>
 ;; Created: 2014-07-20
-;; Version: 2.0
+;; Modified: 2025-07-31
+;; Version: 2.0-forked
 ;; Package-Requires: ((org "8.2") (emacs "24.4") (dash "2.8") (ht "2.0"))
 ;; Keywords: tools
 ;; URL: https://github.com/a-fent/ox-pandoc
+;; URL: https://github.com/mlmbl/ox-pandoc (forked and modified)
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -117,6 +120,17 @@ For example, if you want to specify markdown to have footnotes extension,
 set as `(markdown_strict+footnotes)'."
   :group 'org-pandoc
   :type '(repeat symbol))
+
+(defcustom pandoc-input-extensions ""
+  "Pandoc's org-mode input format extension.
+  This string is appended to \"org\" for the -f command-line flag.
+  For example, set this to \"+east_asian_line_breaks\" to enable
+  support for East Asian line breaks."
+  :group 'org
+  :type 'string)
+
+(defvar pandoc-file-local-input-extensions nil
+  "Holds the input extension for the current pandoc export job.")
 
 (defcustom org-pandoc-command "pandoc"
   "Pandoc command."
@@ -282,6 +296,7 @@ version. If nil, no checks are performed and no warnings generated."
     (:pandoc-extensions "PANDOC_EXTENSIONS" nil nil space)
     (:pandoc-metadata "PANDOC_METADATA" nil nil space)
     (:pandoc-variables "PANDOC_VARIABLES" nil nil space)
+    (:pandoc-input-extensions "PANDOC_INPUT_EXTENSIONS" nil nil space)
     (:epub-chapter-level "EPUB_CHAPTER_LEVEL" nil nil t)
     (:epub-cover-image "EPUB_COVER" nil nil t)
     (:epub-stylesheet "EPUB_STYLESHEET" nil nil t)
@@ -1727,6 +1742,9 @@ Option table is created in this stage."
   (org-pandoc-put-options org-pandoc-options)
   (org-pandoc-put-options
    (symbol-value (intern (format "org-pandoc-options-for-%s" org-pandoc-format))))
+  ;; input extensions
+  (setq pandoc-file-local-input-extensions
+      (plist-get info :pandoc-input-extensions))
   ;; file options
   (-when-let (pandoc-options (plist-get info :pandoc-options))
     (org-pandoc-put-options
@@ -1939,8 +1957,9 @@ when the process completes."
          (output-format
           (car (--filter (string-prefix-p format it)
                          org-pandoc-format-extensions-str)))
+	 (input-extensions (or pandoc-file-local-input-extensions pandoc-input-extensions))
          (args
-          `("-f" "org"
+          `("-f" ,(concat "org" input-extensions)
             "-t" ,(or output-format format)
             ,@(and output-file
                    (list "-o" (expand-file-name output-file)))

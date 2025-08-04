@@ -125,6 +125,7 @@ option-value pair must be quoted (see example below).
 - =PANDOC_OPTIONS:= :: Add command line options to the Pandoc process.
 - =PANDOC_METADATA:= :: Metadata for Pandoc.
 - =PANDOC_EXTENSIONS:= :: Extensions for specific Pandoc output.
+- =PANDOC_INPUT_EXTENSIONS:= :: Extensionf for input format (e.g. +east_asian_line_breaks, etc.)
 - =PANDOC_VARIABLES:= :: Variables for Pandoc.
 - =EPUB_RIGHTS:= :: copyright info to be embedded to EPUB metadata.
 - =EPUB_CHAPTER_LEVEL:= :: same as 'epub-chapter-level' pandoc-option.
@@ -402,6 +403,10 @@ fixes or features will be ported to this version.
 
   In 2021, the package was updated to address small feature requests, apply patches and fix a number of bugs, most of which had arisen through changes in =pandoc= itself. The package is currently maintained by  [[http://github.com/a-fent][a-fent]].
 
+  In 2025, the package was forked and modified by [[https://github.com/mlmbl][mlmbl]] to support input format extensions such as `org+east_asian_line_breaks`. This enhancement allows specifying extended input formats via a new customizable variable `pandoc-input-extensions`, enabling more fine-grained control over how Pandoc interprets the source document.
+
+
+  
 * License
 
   GPLv2.
