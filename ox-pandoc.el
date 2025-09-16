@@ -50,7 +50,7 @@
   '( abbreviations ascii atx-headers base-header-level bash-completion
      biblatex bibliography citation-abbreviations citeproc columns csl css
      data-dir default-image-extension defaults dpi dump-args email-obfuscation eol
-     epub-chapter-level epub-cover-image epub-embed-font epub-metadata
+     epub-cover-image epub-embed-font epub-metadata
      epub-subdirectory extract-media fail-if-warnings file-scope filter
      highlight-style html-q-tags id-prefix ignore-args include-after-body
      include-before-body include-in-header incremental
@@ -60,7 +60,7 @@
      pdf-engine-opt pdf-engine preserve-tabs print-default-data-file
      print-default-template quiet reference-doc reference-links
      reference-location resource-path section-divs self-contained
-     shift-heading-level-by slide-level standalone strip-comments
+     shift-heading-level-by slide-level split-level standalone strip-comments
      syntax-definition tab-stop  table-of-contents template title-prefix
      toc top-level-division toc-depth trace track-changes variable
      verbose version webtex wrap))
@@ -282,7 +282,7 @@ version. If nil, no checks are performed and no warnings generated."
     (:pandoc-extensions "PANDOC_EXTENSIONS" nil nil space)
     (:pandoc-metadata "PANDOC_METADATA" nil nil space)
     (:pandoc-variables "PANDOC_VARIABLES" nil nil space)
-    (:epub-chapter-level "EPUB_CHAPTER_LEVEL" nil nil t)
+    (:split-level "SPLIT_LEVEL" nil nil)
     (:epub-cover-image "EPUB_COVER" nil nil t)
     (:epub-stylesheet "EPUB_STYLESHEET" nil nil t)
     (:epub-embed-font "EPUB_EMBED_FONT" nil nil newline)
@@ -1759,7 +1759,7 @@ Option table is created in this stage."
                (variable . :pandoc-variables))))
   (let ((org-pandoc-valid-options
 		 '((epub-embed-font .    :epub-embed-font)
-               (epub-chapter-level . :epub-chapter-level)
+               (split-level .        :split-level)
                (epub-cover-image   . :epub-cover-image)
                (epub-stylesheet    . :epub-stylesheet)
                ;;(bibliography .       :bibliography)
