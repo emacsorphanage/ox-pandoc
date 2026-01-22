@@ -1679,8 +1679,10 @@ holding contextual information."
 
          ((string-prefix-p "citeproc_bib_item" path) ; Rendered citation footnote number
 		  ) ;; leave it alone, it should already be correct
-		 
-         (t                           ; captioned items
+
+         ((eq dest-type 'headline)) ; Headline
+         
+         (t                             ; captioned items
           (setq number (org-export-get-ordinal
                         destination info nil #'org-pandoc--has-caption-p))))
 
